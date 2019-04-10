@@ -11,3 +11,6 @@
 # Eclipse workspace files
 .project
 .settings
+
+# Node.js
+node_modules
