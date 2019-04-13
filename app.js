@@ -1,34 +1,25 @@
 const express = require('express');
-const pg = require('pg');
+const { Pool, Client } = require('pg');
 const app = express();
 const port = 3000;
 
 // PostgreSVG Connect String
-const dbConnect = "postgres://lucian:password@localhost:5432/gvdelivery";
+const connectionString = "postgres://lucian:password@localhost:5432/gvdelivery";
 
 function queryClients(callback) {
-    pg.connect(dbConnect,function(err,client,done) {
-        if(err){
-            console.log("Unable to connect to PostgreSQL: "+ err);
-            callback(null,err);
-        }
-        client.query('SELECT restaurant_name,restaurant_cuisine,address FROM clients',function(err,result) {
-            done(); // closing the connection;
-            if (err) {
-                console.log("Error occured during SQL Query: "+err);
-                callback(null,err);
-            }
-            callback(result.rows);
-        });
+    const client = new Client({
+        connectionString: connectionString,
+    })
+    client.connect();
+    
+    client.query('SELECT restaurant_name,restaurant_cuisine,address FROM clients', (err, res) => {
+        client.end();
+        callback(res,err);
     });
 };
 
-const pool = new pg.Pool({
-    user: 'lucian',
-    host: '127.0.0.1',
-    database: 'gvdelivery',
-    password: 'password',
-    port: '5432'
+const pool = new Pool({
+    connectionString: connectionString
 });
 
 function queryClientsFromPool(callback) {
@@ -43,7 +34,7 @@ function queryClientsFromPool(callback) {
                 console.log("Error running query: "+err);
                 callback(null,err);
             }
-            callback(result.rows);
+            callback(result);
         });
     });
 };
@@ -66,7 +57,7 @@ app.get('/db', function (req, res) {
             return;
         }
         res.setHeader('Content-Type', 'text/html');
-        res.write(result.map((r) => { return renderClient(r); }).join('\n'));
+        res.write(result.rows.map((r) => { return renderClient(r); }).join('\n'));
         res.end();
     });  
 });
