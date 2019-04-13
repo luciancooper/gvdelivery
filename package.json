@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/luciancooper/gvdelivery#readme",
   "dependencies": {
-    "express": "*"
+    "express": "*",
+    "pg": "*"
   }
 }
