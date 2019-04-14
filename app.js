@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const { Pool, Client } = require('pg');
 const app = express();
 const port = 3000;
@@ -39,26 +40,25 @@ function queryClientsFromPool(callback) {
     });
 };
 
+// Setup Public Folder
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Setup Views & View Engine
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
 app.get('/', function (req, res) {
-    res.send('Welcome to the Greenwich Village Delivery Service');
+    res.render('dashboard');
 });
 
-function renderClient(json) {
-    let name = `<tr><th>Name</th><td>${json.restaurant_name}</td></tr>`;
-    let cuisine = `<tr><th>Cuisine</th><td>${json.restaurant_cuisine}</td></tr>`;
-    let address = ['Address','City','State','Zip'].map((k) => { return `<tr><th>${k}</th><td>${json.address[k]}</td></tr>`}).join('');
-    return `<table>${name}${cuisine}${address}</table>`;
-}
 
-app.get('/db', function (req, res) {
+app.get('/admin', function (req, res) {
     queryClientsFromPool(function(result,err) {
         if (err) {
             res.status(400).send(err);
             return;
         }
-        res.setHeader('Content-Type', 'text/html');
-        res.write(result.rows.map((r) => { return renderClient(r); }).join('\n'));
-        res.end();
+        res.render('admin', {'results':result.rows});
     });  
 });
 

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('partial/page-head.ejs', {title:'GV Database'}) %>
+</head>
+<body page-main='main' page-panel-left='left-nav' page-topbar='topbar'>
+    <header id='topbar'>
+        <h5>Greenwich Village Delivery Service</h5>
+    </header>
+    <nav id='left-nav' class="side-nav align-center">
+        <a href="/">Home</a>
+    </nav>
+    <main id='main'>
+        <% results.forEach(function(r) { %>
+            <%- include('partial/client.ejs', {data:r}) %>
+        <% }); %>
+    </main>
+</body>
+</html>
