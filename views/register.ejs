@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('partial/page-head.ejs', {title:'GV Register'}) %>
+</head>
+<body page-main='main' page-topbar='topbar'>
+    <header id='topbar'>
+        <h5>Greenwich Village Delivery Service</h5>
+    </header>
+    <main id='main'>
+      <main class="card signup">
+        <form>
+            <h3>Restaurant Info</h3>
+            <section>
+                <div class="input-label-placeholder">
+                    <input type="text" class="form-input" placeholder='Restaurant Name' name='name' required autofocus>
+                    <label>Restaurant Name</label>
+                </div>
+                <select class="form-select" name="cuisine" required>
+                    <option selected>Please Select a Cuisine</option>
+                    <option value='American'>American</option>
+                    <option value='Cajun'>Cajun</option>
+                    <option value='Caribbean'>Caribbean</option>
+                    <option value='Chinese'>Chinese</option>
+                    <option value='French'>French</option>
+                    <option value='German'>German</option>
+                    <option value='Greek'>Greek</option>
+                    <option value='Indian'>Indian</option>
+                    <option value='Italian'>Italian</option>
+                    <option value='Japanese'>Japanese</option>
+                    <option value='Korean'>Korean</option>
+                    <option value='Lebanese'>Lebanese</option>
+                    <option value='Mediterranean'>Mediterranean</option>
+                    <option value='Mexican'>Mexican</option>
+                    <option value='Moroccan'>Moroccan</option>
+                    <option value='Seafood'>Seafood</option>
+                    <option value='Soul'>Soul</option>
+                    <option value='Spanish'>Spanish</option>
+                    <option value='Thai'>Thai</option>
+                    <option value='Turkish'>Turkish</option>
+                    <option value='Vegitarian'>Vegitarian</option>
+                    <option value='Vietnamese'>Vietnamese</option>
+                </select>
+            </section>
+            <h3>Restaurant Address</h3>
+            <section>
+                <div class="input-label-placeholder">
+                    <input type="text" class="form-input" placeholder='Address' name='address' required>
+                    <label>Address</label>
+                </div>
+                <div class='flex-row'>
+                    <div class="input-label-placeholder grow-5">
+                        <input type="text" class="form-input" placeholder="City" name='city' required value='New York'>
+                        <label>City</label>
+                    </div>
+                    <div class="input-label-placeholder grow-1">
+                        <input type="text" class="form-input" placeholder="State" name='state' required value="NY">
+                        <label>State</label>
+                    </div>
+                    <div class="input-label-placeholder grow-3">
+                        <input type="text" class="form-input" placeholder="Zip" name='zip' required>
+                        <label>Zip</label>
+                    </div>
+                </div>
+
+            </section>
+            <h3>Login Info</h3>
+            <section>
+                <div class="input-label-placeholder">
+                    <input type="text" class="form-input" placeholder="Username" name='username' required>
+                    <label>Username</label>
+                </div>
+                <div class="input-label-placeholder">
+                    <input type="password" class="form-input" placeholder="Password" name='password' required>
+                    <label>Password</label>
+                </div>
+                <div class="input-label-placeholder">
+                    <input type="password" class="form-input" placeholder="Confirm Password" name='password_confirm' required>
+                    <label>Confirm Password</label>
+                </div>
+            </section>
+            <button type='submit' class="btn btn-primary btn-block">Register</button>
+        </form>
+        <div class="flex-col align-center text-small">
+            <a href="#">Login to Existing Account</a>
+        </div>
+      </main>
+    </main>
+</body>
+</html>
+
+
+
+
