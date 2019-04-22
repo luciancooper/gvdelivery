@@ -11,16 +11,16 @@
         <div class="card login">
             <header>Login</header>
             <main>
-                <form>
+                <form action="/login" method="post">
                     <section>
                         <div class="input-label-placeholder">
-                            <input type="email" class="form-input" placeholder="Email address" required autofocus>
-                            <label>Email address</label>
+                            <input type="text" class="form-input" placeholder="Username" name="username" required autofocus>
+                            <label>Username</label>
                         </div>
                     </section>
                     <section>
                         <div class="input-label-placeholder">
-                            <input type="password" class="form-input" placeholder="Password" required>
+                            <input type="password" class="form-input" placeholder="Password" name="password" required>
                             <label>Password</label>
                         </div>
                     </section>

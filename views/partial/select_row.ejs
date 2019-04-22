@@ -1,0 +1,17 @@
+<tbody>
+    <tr><th><code>id</code></th><td><code><%= data.id %></code></td></tr>
+    <tr><th><code>username</code></th><td><code><%= data.username %></code></td></tr>
+    <tr><th><code>password</code></th><td><code><%= data.password %></code></td></tr>
+    <% if (data.name) { %>
+        <tr><th><code>name</code></th><td><code><%= data.name %></code></td></tr>
+    <% } %>
+    <% if (data.cuisine) { %>
+        <tr><th><code>cuisine</code></th><td><code><%= data.cuisine %></code></td></tr>
+    <% } %>
+    <% if (data.address) { %>
+        <tr><th><code>address</code></th><td><code><%= data.address['Address'] %></code></td></tr>
+        <tr><th><code>city</code></th><td><code><%= data.address['City'] %></code></td></tr>
+        <tr><th><code>state</code></th><td><code><%= data.address['State'] %></code></td></tr>
+        <tr><th><code>zip</code></th><td><code><%= data.address['Zip'] %></code></td></tr>
+    <% } %>
+</tbody>

@@ -11,9 +11,13 @@
         <a href="/">Home</a>
     </nav>
     <main id='main'>
-        <% results.forEach(function(r) { %>
-            <%- include('partial/client.ejs', {data:r}) %>
-        <% }); %>
+        <% if (rows) { %>
+            <table>
+                <% rows.forEach(function(r) { %>
+                    <%- include('partial/select_row.ejs', {data:r}) %>
+                <% }); %>
+            </table>
+        <% } %>
     </main>
 </body>
 </html>
