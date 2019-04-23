@@ -14,19 +14,25 @@
                 <form action="/login" method="post">
                     <section>
                         <div class="input-label-placeholder">
-                            <input type="text" class="form-input" placeholder="Username" name="username" required autofocus>
+                            <% if (username) { %>
+                                <input type="text" class="form-input" placeholder="Username" name="username" required value="<%= username %>">
+                            <% } else { %>
+                                <input type="text" class="form-input" placeholder="Username" name="username" required autofocus>
+                            <% } %>
                             <label>Username</label>
                         </div>
                     </section>
                     <section>
                         <div class="input-label-placeholder">
-                            <input type="password" class="form-input" placeholder="Password" name="password" required>
+                            <% if (username) { %>
+                                <input type="password" class="form-input" placeholder="Password" name="password" required autofocus>
+                            <% } else { %>
+                                <input type="password" class="form-input" placeholder="Password" name="password" required>
+                            <% } %>
                             <label>Password</label>
                         </div>
                     </section>
-                    <section>
-                        <label class='checkbox'><input type="checkbox" value="remember-me">Remember Password</label>
-                    </section>
+                    <section class='alert'><%= message %></section>
                     <button class="btn btn-primary btn-block" type='submit'>Login</button>
                 </form>
                 <div class="flex-col align-center text-small">

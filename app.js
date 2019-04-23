@@ -91,18 +91,27 @@ app.route('/register').get(sessionChecker, (req, res) => {
 
 // route for user Login
 app.route('/login').get(sessionChecker, (req, res) => {
-    res.render('login');
+    let data = req.session.login_data || {};
+    res.render('login',{message:(data.message || ''),username:data.username});
+    delete req.session.login_data;
 }).post((req, res) => {
     // Handle Login
-    db.checkUsername(req.body.username,function(user,err){
+    let data = {
+        username:req.body.username,
+        password:req.body.password
+    };
+    //console.log(`Handling Login -> username:'${data.username}' password:'${data.password}'`)
+    db.checkUsername(data.username,function(user,err){
         if (err) return res.status(400).send(err);
         if (!user) {
+            req.session.login_data = {message:"No Username Found",username:data.username};
             return res.redirect('/login');
         }
-        if (bcrypt.compareSync(req.body.password, user.password)) {
+        if (bcrypt.compareSync(data.password, user.password)) {
             req.session.user = user.id;
             return res.redirect('/dashboard');
         } else {
+            req.session.login_data = {message:"Incorrect Password",username:data.username};
             return res.redirect('/login');
         }
     });
@@ -110,6 +119,7 @@ app.route('/login').get(sessionChecker, (req, res) => {
 
 // route for user's dashboard
 app.get('/dashboard', (req, res) => {
+    console.log(`req.session.user:'${req.session.user}' req.cookies.user_sid:'${req.cookies.user_sid}'`)
     if (req.session.user && req.cookies.user_sid) {
         res.render('dashboard');
     } else res.redirect('/login');
