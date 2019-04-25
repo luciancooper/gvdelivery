@@ -50,7 +50,7 @@ var sessionChecker = (req, res, next) => {
 
 // route for home page
 app.get('/', sessionChecker, (req, res) => {
-    res.redirect('/login');
+    res.redirect('/home');
 });
 
 // route for restuarant registration
@@ -121,7 +121,10 @@ app.route('/login').get(sessionChecker, (req, res) => {
 app.get('/dashboard', (req, res) => {
     console.log(`req.session.user:'${req.session.user}' req.cookies.user_sid:'${req.cookies.user_sid}'`)
     if (req.session.user && req.cookies.user_sid) {
-        res.render('dashboard');
+        db.getRestaurantName(req.session.user,function(name,err) {
+            if (err) return res.status(400).send(err);
+            res.render('dashboard',{name:name});
+        });
     } else res.redirect('/login');
 });
 
@@ -141,9 +144,13 @@ app.get('/admin', function (req, res) {
     });
 });
 
+app.get('/home', function (req, res) {
+    res.render('home');
+});
+
 // route for handling 404 requests(unavailable routes)
 app.use(function (req, res, next) {
     res.status(404).send("Sorry can't find that!")
 });
 
-app.listen(port, () => console.log(`Web app listening on port ${port}!`))
+app.listen(port, () => console.log(`Web app listening at localhost:${port}`))

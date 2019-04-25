@@ -48,6 +48,7 @@ body[page-main] > .page-topbar {
 	text-shadow: 1px 1px rgba(255,255,255,.7);
     background-color: #f8f8f8;
     border-color: #e7e7e7;
+    z-index:1000;
 }
 
 body[page-main] > .page-topbar > section {
@@ -86,6 +87,26 @@ body[page-main] > .page-panel-bottom {
     overflow:scroll;
     -webkit-overflow-scrolling: touch;
     margin:5px;
+}
+
+body[page-main].flush > .page-main,
+body[page-main].flush > .page-panel-left,
+body[page-main].flush > .page-panel-right,
+body[page-main].flush > .page-panel-bottom {
+    border-width:0px;
+    margin:0px;
+}
+body[page-main].flush > .page-topbar[yield] {
+    margin:0px;
+}
+body[page-main].flush > .page-panel-left {
+    border-right-width:1px;
+}
+body[page-main].flush > .page-panel-right {
+    border-left-width:1px;
+}
+body[page-main].flush > .page-panel-bottom {
+    border-top-width:1px;
 }
 
 body[page-main] > .page-panel-left[page-panel='flex'] {

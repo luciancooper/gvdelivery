@@ -145,6 +145,57 @@ input[type="month"] {
     text-align: center !important;
 }
 
+/* ========================================================[Page-Header]======================================================== */
+
+body>header {
+    height: 3em;
+    padding:0.2em 0.6em; 
+    position:fixed;
+    display: flex;
+	flex-flow: row nowrap;
+	justify-content: flex-start;
+	align-items: center;
+    overflow: visible;
+    border-width:1px;
+    border-style:solid;
+    border-color:transparent transparent rgba(0,0,0,0.2) transparent;
+    box-shadow:none;
+    color: rgb(93,107,108);
+    background-color: #f8f8f8;
+    border-color: #e7e7e7;
+    width:100%;
+}
+body>main {
+    position:fixed;
+    top:0px;
+    left:0px;
+    right:0px;
+    bottom:0px;
+}
+body>header+main {
+    top:3em;
+}
+.container {
+    width:75%;
+    margin-left:auto;
+    margin-right:auto;
+}
+body>header h1,
+body>header h2,
+body>header h3,
+body>header h4,
+body>header h5,
+body>header h6 {
+    margin:0px;
+    align-self:center;
+}
+
+body>header .btn {
+    align-self:center;
+    padding-top: 0.175rem;
+    padding-bottom: 0.175rem;
+}
+
 /* ========================================================[Flex]======================================================== */
 
 .flex-col {
@@ -160,12 +211,28 @@ input[type="month"] {
     align-items:center;
 }
 
+.flex-col[spaced='0.25']>*+* { margin-top:0.25rem; }
+.flex-row[spaced='0.25']>*+* { margin-left:0.25rem; }
+.flex-col[spaced='0.5']>*+* { margin-top:0.5rem; }
+.flex-row[spaced='0.5']>*+* { margin-left:0.5rem; }
+.flex-col[spaced='0.75']>*+* { margin-top:0.75rem; }
+.flex-row[spaced='0.75']>*+* { margin-left:0.75rem; }
+.flex-col[spaced='1']>*+* { margin-top:1rem; }
+.flex-row[spaced='1']>*+* { margin-left:1rem; }
+
 .align-center {
     align-items:center!important;
 }
 .align-stretch {
     align-items: stretch!important;
 }
+.justify-end { justify-content:flex-end!important; }
+.justify-start { justify-content:flex-start!important; }
+.justify-center { justify-content:center!important; }
+.justify-around { justify-content:space-around!important; }
+.justify-between { justify-content:space-between!important; }
+.justify-evenly { justify-content:space-evenly!important; }
+
 
 .grow-1 { flex-grow:1; flex-shrink:1; }
 .grow-2 { flex-grow:2; flex-shrink:2; }
@@ -398,6 +465,7 @@ label.checkbox {
     flex-flow:row nowrap;
     align-items:center;
     justify-content: flex-start;
+    padding: 0.5rem;
 }
 label.checkbox>*:first-child {
     margin-right:0.5rem;

@@ -86,7 +86,22 @@ const db = (function(){
                     return callback();
                 });
             });
-            
+        },
+        getRestaurantName:function(id,callback) {
+            pool.connect(function(err,client,done) {
+                if (err) {
+                    console.log("Unable to connect to PostgreSQL: "+ err);
+                    return callback(null,err);
+                }
+                client.query(`SELECT name FROM restaurants WHERE client_id = ${id}`,function(err,result) {
+                    done(); // release client back to pool
+                    if (err) {
+                        console.log("Error running query: "+err);
+                        return callback(null,err);
+                    }
+                    return callback(result.rows[0].name);
+                });
+            });
         }
     };
 }());

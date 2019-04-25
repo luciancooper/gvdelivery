@@ -3,9 +3,13 @@
 <head>
     <%- include('partial/page-head.ejs', {title:'GV Register'}) %>
 </head>
-<body page-main='main' page-topbar='topbar'>
+<body page-main='main' page-topbar='topbar' class='flush'>
     <header id='topbar'>
-        <h5>Greenwich Village Delivery Service</h5>
+        <div class='container flex-row align-center'>
+            <h4>Greenwich Village Delivery Service</h4>
+            <span class='grow-1'></span>
+            <a class='btn btn-outline-primary' href='/'><i class="fas fa-home"></i></a>
+        </div>
     </header>
     <main id='main'>
       <main class="card signup">
@@ -82,7 +86,7 @@
             <button type='submit' class="btn btn-primary btn-block">Register</button>
         </form>
         <div class="flex-col align-center text-small">
-            <a href="#">Login to Existing Account</a>
+            <a href="/login">Login to Existing Account</a>
         </div>
       </main>
     </main>

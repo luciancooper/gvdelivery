@@ -2,16 +2,83 @@
 <html>
 <head>
     <%- include('partial/page-head.ejs', {title:'GV Dashboard'}) %>
+    <script>
+    function toggleOpen(event) {
+        this.nextElementSibling.classList.toggle('show');
+    }
+    </script>
 </head>
-<body page-main='main' page-panel-left='left-nav' page-topbar='topbar'>
+<body page-main='main' page-panel-left='left-nav' page-topbar='topbar' class='flush'>
     <header id='topbar'>
-        <h5>Greenwich Village Delivery Service</h5>
+        <div class='container flex-row align-center'>
+            <h4>Greenwich Village Delivery Service</h4>
+            <span class='grow-1'></span>
+            <div class="dropdown">
+                <div class="btn btn-primary dropdown-toggle flex-row align-center" spaced='0.5' onclick='toggleOpen.call(this,event)'>
+                    <i class="fas fa-user"></i>
+                    <span><%= name %></span>
+                </div>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/logout">Logout</a>
+                </div>
+            </div>
+        </div>
     </header>
-    <nav id='left-nav' class="side-nav align-center">
-        <a href="/admin">admin</a>
-    </nav>
-    <main id='main'>
-        <h5>This is the Dashboard</h5>
+    <form id='left-nav' class="side-nav align-stretch" style='min-width:15%;'>
+        <input type="hidden" name="active_tab" value="new_delivery">
+        <input type="radio" class="tab-item" name="tab" value="new_delivery" label="New Delivery">
+        <input type="radio" class="tab-item" name="tab" value="current_deliveries" label="Current Deliveries">
+        <input type="radio" class="tab-item" name="tab" value="past_deliveries" label="Past Deliveries">
+    </form>
+    <main id='main' page-tabbed="left-nav" class='tab-container'>
+        <div class='tab' id='new_delivery'>
+            <div class='container'>
+                <form action="/dashboard" method="post">
+                    <section>
+                        <h4>Delivery Address</h4>
+                        <div class="input-label-placeholder">
+                            <input type="text" class="form-input" placeholder='Address' name='address' required>
+                            <label>Address</label>
+                        </div>
+                        <div class='flex-row'>
+                            <div class="input-label-placeholder grow-5">
+                                <input type="text" class="form-input" placeholder="City" name='city' required value='New York'>
+                                <label>City</label>
+                            </div>
+                            <div class="input-label-placeholder grow-1">
+                                <input type="text" class="form-input" placeholder="State" name='state' required value="NY">
+                                <label>State</label>
+                            </div>
+                            <div class="input-label-placeholder grow-3">
+                                <input type="text" class="form-input" placeholder="Zip" name='zip' required>
+                                <label>Zip</label>
+                            </div>
+                        </div>
+                    </section>
+                    <section>
+                        <h4>Delivery Details</h4>
+                        <div class="input-label-placeholder">
+                            <input type="number" class="form-input" placeholder='Price ($)' name='price' step="0.01" min="0.00" required>
+                            <label>Price ($)</label>
+                        </div>
+                        <section>
+                            <label class='checkbox'><input type="checkbox" name='prepaid'>Prepaid</label>
+                        </section>
+                        <div class="input-label-placeholder">
+                            <input type="number" class="form-input" placeholder='Prep Estimate (Minutes)' name='preptime' required>
+                            <label>Prep Estimate (Minutes)</label>
+                        </div>
+                    </section>
+                    <button class="btn btn-primary btn-block" type='submit'>Submit Delivery</button>
+                </form>
+            </div>
+        </div>
+        <div class='tab' id='current_deliveries'>
+            
+        </div>
+        <div class='tab' id='past_deliveries'>
+
+        </div>
     </main>
 </body>
 </html>
