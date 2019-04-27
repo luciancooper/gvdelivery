@@ -7,6 +7,15 @@
         this.nextElementSibling.classList.toggle('show');
     }
     </script>
+    <style>
+        .order-table:empty:before {
+            content:"No Orders to Show";
+            display:table-caption;
+            text-align:center;
+            font-size:1.5em;
+            padding: 0.8em 0.4em 0.4em 0.4em;
+        }
+    </style>
 </head>
 <body page-main='main' page-panel-left='left-nav' page-topbar='topbar' class='flush'>
     <header id='topbar'>
@@ -25,7 +34,7 @@
         </div>
     </header>
     <form id='left-nav' class="side-nav align-stretch" style='min-width:15%;'>
-        <input type="hidden" name="active_tab" value="new_delivery">
+        <input type="hidden" name="active_tab" value="<%if(tab){%><%= tab %><%}else{%>new_delivery<%}%>">
         <input type="radio" class="tab-item" name="tab" value="new_delivery" label="New Delivery">
         <input type="radio" class="tab-item" name="tab" value="current_deliveries" label="Current Deliveries">
         <input type="radio" class="tab-item" name="tab" value="past_deliveries" label="Past Deliveries">
@@ -62,7 +71,7 @@
                             <label>Price ($)</label>
                         </div>
                         <section>
-                            <label class='checkbox'><input type="checkbox" name='prepaid'>Prepaid</label>
+                            <label class='checkbox'><input type="checkbox" name='prepaid' value='TRUE'>Prepaid</label>
                         </section>
                         <div class="input-label-placeholder">
                             <input type="number" class="form-input" placeholder='Prep Estimate (Minutes)' name='preptime' required>
@@ -74,10 +83,10 @@
             </div>
         </div>
         <div class='tab' id='current_deliveries'>
-            
+            <table class='container order-table'><% orders.filter((o) => { return !o.time_delivered; }).forEach((o) => { %><%- include('partial/order-item.ejs', {data:o}) %><% }); %></table>
         </div>
         <div class='tab' id='past_deliveries'>
-
+            <table class='container order-table'><% orders.filter((o) => { return !!o.time_delivered; }).forEach((o) => { %><%- include('partial/order-item.ejs', {data:o}) %><% }); %></table>
         </div>
     </main>
 </body>

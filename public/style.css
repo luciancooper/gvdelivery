@@ -76,6 +76,10 @@ tbody+tbody:before {
     height:10px;
 }
 
+td > pre {
+    white-space:pre-line;
+    margin:0px;
+}
 button {
     border-radius: 0;
 }

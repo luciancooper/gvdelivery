@@ -1,0 +1,13 @@
+<tbody>
+    <tr><th>Delivery Address</th><td><pre><%= data.delivery_address['Address'] %>
+    <%= data.delivery_address['City'] %>, <%= data.delivery_address['State'] %>, <%= data.delivery_address['Zip'] %>
+    </pre></td></tr>
+    <tr><th>Price</th><td><code><%= data.price %></code></td></tr>
+    <tr><th>Prepaid</th><td><code><%= data.prepaid %></code></td></tr>
+    <tr><th>Time Placed</th><td><code><%= data.time_placed %></code></td></tr>
+    <tr><th>Time Ready</th><td><code><%= data.time_ready %></code></td></tr>
+    <tr><th>Time Expected</th><td><code><%= data.time_expected %></code></td></tr>
+    <% if (data.time_delivered) { %>
+        <tr><th><code>Time Delivered</code></th><td><code><%= data.time_delivered %></code></td></tr>
+    <% } %>
+</tbody>

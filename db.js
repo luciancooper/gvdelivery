@@ -31,6 +31,9 @@ const db = (function(){
         selectRestaurants:function(callback) {
             executeSelect(callback,'SELECT u.id, u.username, u.password, r.name, r.cuisine, r.address FROM users u INNER JOIN restaurants r ON (u.id = r.client_id)');
         },
+        getOrders:function(id,callback) {
+            executeSelect(callback,`SELECT delivery_address, price, prepaid, time_placed, time_ready, time_expected, time_delivered FROM orders WHERE restaurant_id = ${id}`);
+        },
         checkUsername: function(username,callback) {
             pool.connect(function(err,client,done) {
                 if (err) {
@@ -102,7 +105,31 @@ const db = (function(){
                     return callback(result.rows[0].name);
                 });
             });
-        }
+        },
+        createOrder:function(data,callback) {
+            pool.connect(function(err,client,done) {
+                if (err) {
+                    console.log("Unable to connect to PostgreSQL: "+ err);
+                    return callback(err);
+                }
+                let sql = `INSERT INTO orders(restaurant_id, delivery_address, price, prepaid, time_placed, time_ready, time_expected) VALUES (${data.id},'${data.address}', '${data.price}', ${data.prepaid}, '${data.time_placed}','${data.time_ready}','${data.time_expected}')`;
+                client.query(sql,function(err,result) {
+                    done(); // release client back to pool
+                    if (err) {
+                        console.log("Error running query: "+err);
+                        return callback(err);
+                    }
+                    return callback();
+                });
+            });
+        },
+        // @param {Date} date - A date object instance
+        formatTimeString: function(date) {
+            let ts = /(\d{2}:\d{2}:\d{2}) \w+([+\-]\d{2})/.exec(date.toTimeString());
+            let time = ts[1],tz = ts[2];
+            let d = date.getDate(),m = date.getMonth()+1,y = date.getFullYear();
+            return `${y}-${m>9?m:'0'+m}-${d>9?d:'0'+d} ${time}${tz}`;
+        },
     };
 }());
 

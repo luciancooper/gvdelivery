@@ -65,12 +65,14 @@ app.route('/register').get(sessionChecker, (req, res) => {
         cuisine:req.body.cuisine,
         address:`{"Address":"${req.body.address}","City":"${req.body.city}","State":"${req.body.state}","Zip":"${req.body.zip}"}`
     };
-    console.log(`username:'${data.username}'`);
-    console.log(`password:'${data.password}'`);
-    console.log(`name:'${data.name}'`);
-    console.log(`cuisine:'${data.cuisine}'`);
-    console.log(`address:'${data.address}'`);
-
+    console.log(`
+    --------- Handling New Registration ---------
+    username:'${data.username}'
+    password:'${data.password}'
+    name:'${data.name}'
+    cuisine:'${data.cuisine}'
+    address:'${data.address}'
+    `);
     db.checkUsername(data.username,function(user,err) {
         if (err) return res.status(400).send(err);
         if (user) return res.redirect('/register');
@@ -118,14 +120,51 @@ app.route('/login').get(sessionChecker, (req, res) => {
 });
 
 // route for user's dashboard
-app.get('/dashboard', (req, res) => {
+app.route('/dashboard').get((req, res) => {
     console.log(`req.session.user:'${req.session.user}' req.cookies.user_sid:'${req.cookies.user_sid}'`)
     if (req.session.user && req.cookies.user_sid) {
         db.getRestaurantName(req.session.user,function(name,err) {
             if (err) return res.status(400).send(err);
-            res.render('dashboard',{name:name});
+            db.getOrders(req.session.user,function(orders,err) {
+                if (err) return res.status(400).send(err);
+                res.render('dashboard',{name:name,orders:orders,tab:undefined});
+            });
         });
     } else res.redirect('/login');
+}).post((req, res) => {
+    // Handle New Order
+    let ts_placed = Date.now(),
+        ts_ready = ts_placed+(req.body.preptime*60000),
+        ts_expected = ts_ready+(20*60000);
+    let data = {
+        id:req.session.user,
+        address:`{"Address":"${req.body.address}","City":"${req.body.city}","State":"${req.body.state}","Zip":"${req.body.zip}"}`,
+        time_placed:db.formatTimeString(new Date(ts_placed)),
+        time_ready:db.formatTimeString(new Date(ts_ready)),
+        time_expected:db.formatTimeString(new Date(ts_expected)),
+        price:req.body.price,
+        prepaid:(req.body.prepaid || 'FALSE'),
+    };
+    console.log(`
+    --------- Handling New Order ---------
+    address:${data.address}
+    time_placed:${data.time_placed}
+    time_ready:${data.time_ready}
+    time_expected:${data.time_expected}
+    price:${data.price}
+    prepaid:${data.prepaid}
+    `);
+
+    db.createOrder(data,function(err) {
+        if (err) return res.status(400).send(err);
+        db.getRestaurantName(req.session.user,function(name,err) {
+            if (err) return res.status(400).send(err);
+            db.getOrders(req.session.user,function(orders,err) {
+                if (err) return res.status(400).send(err);
+                res.render('dashboard',{name:name,orders:orders,tab:'current_deliveries'});
+            });
+        });
+    });
 });
 
 // route for user logout
