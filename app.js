@@ -176,10 +176,25 @@ app.get('/logout', (req, res) => {
 });
 
 
-app.get('/admin', function (req, res) {
-    db.selectRestaurants(function(rows,err) {
+app.route('/admin').get((req, res) => {
+    db.selectRestaurants(function(users,err) {
         if (err) return res.status(400).send(err);
-        res.render('admin',{'rows':rows});
+        db.getOrdersAdmin(function(orders,err) {
+            if (err) return res.status(400).send(err);
+            res.render('admin',{users:users,orders:orders,tab:undefined});
+        })
+    });
+}).post((req, res) => {
+    // Handle Order Completion
+    db.completeOrder(req.body.orderid,Date.now(),function(err) {
+        if (err) return res.status(400).send(err);
+        db.selectRestaurants(function(users,err) {
+            if (err) return res.status(400).send(err);
+            db.getOrdersAdmin(function(orders,err) {
+                if (err) return res.status(400).send(err);
+                res.render('admin',{users:users,orders:orders,tab:'current_deliveries'});
+            })
+        });
     });
 });
 

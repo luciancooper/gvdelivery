@@ -55,10 +55,20 @@ body {
     background-color: #fff;
 }
 
+/* ========================================================[Tables]======================================================== */
+
 table {
     margin:5px;
     border-spacing: 1;
     border-collapse: separate;
+}
+
+table[empty-message]:empty:before {
+    content:attr(empty-message);
+    display:table-caption;
+    text-align:center;
+    font-size:1.5em;
+    padding: 0.8em 0.4em 0.4em 0.4em;
 }
 
 th,td {
@@ -80,6 +90,17 @@ td > pre {
     white-space:pre-line;
     margin:0px;
 }
+
+td.content-fill,th.content-fill {
+    border-width:0px;
+    padding:0px;
+}
+td.content-fill *, th.content-fill * {
+    border-radius:inherit!important;
+}
+
+/* ========================================================[Element Tags]======================================================== */
+
 button {
     border-radius: 0;
 }

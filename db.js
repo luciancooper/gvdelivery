@@ -34,6 +34,9 @@ const db = (function(){
         getOrders:function(id,callback) {
             executeSelect(callback,`SELECT delivery_address, price, prepaid, time_placed, time_ready, time_expected, time_delivered FROM orders WHERE restaurant_id = ${id}`);
         },
+        getOrdersAdmin:function(callback) {
+            executeSelect(callback,'SELECT o.id, r.name, o.delivery_address, o.price, o.prepaid, o.time_placed, o.time_ready, o.time_expected, o.time_delivered FROM orders o INNER JOIN restaurants r ON (o.restaurant_id = r.client_id)');
+        },
         checkUsername: function(username,callback) {
             pool.connect(function(err,client,done) {
                 if (err) {
@@ -114,6 +117,23 @@ const db = (function(){
                 }
                 let sql = `INSERT INTO orders(restaurant_id, delivery_address, price, prepaid, time_placed, time_ready, time_expected) VALUES (${data.id},'${data.address}', '${data.price}', ${data.prepaid}, '${data.time_placed}','${data.time_ready}','${data.time_expected}')`;
                 client.query(sql,function(err,result) {
+                    done(); // release client back to pool
+                    if (err) {
+                        console.log("Error running query: "+err);
+                        return callback(err);
+                    }
+                    return callback();
+                });
+            });
+        },
+        completeOrder:function(id,timestamp,callback) {
+            timestamp = this.formatTimeString(new Date(timestamp));
+            pool.connect(function(err,client,done) {
+                if (err) {
+                    console.log("Unable to connect to PostgreSQL: "+ err);
+                    return callback(err);
+                }
+                client.query(`UPDATE orders SET time_delivered = '${timestamp}' WHERE id = ${id}`,function(err,result) {
                     done(); // release client back to pool
                     if (err) {
                         console.log("Error running query: "+err);

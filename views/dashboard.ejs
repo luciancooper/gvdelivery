@@ -7,15 +7,6 @@
         this.nextElementSibling.classList.toggle('show');
     }
     </script>
-    <style>
-        .order-table:empty:before {
-            content:"No Orders to Show";
-            display:table-caption;
-            text-align:center;
-            font-size:1.5em;
-            padding: 0.8em 0.4em 0.4em 0.4em;
-        }
-    </style>
 </head>
 <body page-main='main' page-panel-left='left-nav' page-topbar='topbar' class='flush'>
     <header id='topbar'>
@@ -83,10 +74,10 @@
             </div>
         </div>
         <div class='tab' id='current_deliveries'>
-            <table class='container order-table'><% orders.filter((o) => { return !o.time_delivered; }).forEach((o) => { %><%- include('partial/order-item.ejs', {data:o}) %><% }); %></table>
+            <table class='container' empty-message='No Orders to Show'><% orders.filter((o) => { return !o.time_delivered; }).forEach((o) => { %><%- include('partial/order-item.ejs', {data:o}) %><% }); %></table>
         </div>
         <div class='tab' id='past_deliveries'>
-            <table class='container order-table'><% orders.filter((o) => { return !!o.time_delivered; }).forEach((o) => { %><%- include('partial/order-item.ejs', {data:o}) %><% }); %></table>
+            <table class='container' empty-message='No Orders to Show'><% orders.filter((o) => { return !!o.time_delivered; }).forEach((o) => { %><%- include('partial/order-item.ejs', {data:o}) %><% }); %></table>
         </div>
     </main>
 </body>

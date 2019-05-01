@@ -1,23 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <%- include('partial/page-head.ejs', {title:'GV Database'}) %>
+    <%- include('partial/page-head.ejs', {title:'GV Admin'}) %>
 </head>
 <body page-main='main' page-panel-left='left-nav' page-topbar='topbar'>
     <header id='topbar'>
-        <h5>Greenwich Village Delivery Service</h5>
+        <div class='container flex-row align-center'>
+            <h4>Greenwich Village Delivery Service</h4>
+            <span class='grow-1'></span>
+            <div class="flex-row align-center" spaced='0.5'>
+                <i class="fas fa-user"></i>
+                <span>Admin</span>
+            </div>
+        </div>
     </header>
-    <nav id='left-nav' class="side-nav align-center">
-        <a href="/">Home</a>
-    </nav>
-    <main id='main'>
-        <% if (rows) { %>
-            <table>
-                <% rows.forEach(function(r) { %>
-                    <%- include('partial/select_row.ejs', {data:r}) %>
-                <% }); %>
-            </table>
-        <% } %>
+    <form id='left-nav' class="side-nav align-stretch" style='min-width:15%;'>
+        <input type="hidden" name="active_tab" value="<%if(tab){%><%= tab %><%}else{%>restaurants<%}%>">
+        <input type="radio" class="tab-item" name="tab" value="restaurants" label="Restaurants">
+        <input type="radio" class="tab-item" name="tab" value="current_deliveries" label="Current Deliveries">
+        <input type="radio" class="tab-item" name="tab" value="past_deliveries" label="Completed Deliveries">
+    </form>
+    <main id='main' page-tabbed="left-nav" class='tab-container'>
+        <div class='tab' id='restaurants'>
+            <table class='container' empty-message='No Restaurant Users to Show'><% if (users) { users.forEach((r) => { %><%- include('partial/admin-user-item.ejs', {data:r}) %><% });} %></table>
+        </div>
+        <div class='tab' id='current_deliveries'>
+            <table class='container' empty-message='No Orders to Show'><% if (orders) { orders.filter((o) => { return !o.time_delivered; }).forEach((o) => { %><%- include('partial/admin-order-item.ejs', {data:o}) %><% });} %></table>
+        </div>
+        <div class='tab' id='past_deliveries'>
+            <table class='container' empty-message='No Orders to Show'><% if (orders) { orders.filter((o) => { return !!o.time_delivered; }).forEach((o) => { %><%- include('partial/admin-order-item.ejs', {data:o}) %><% });} %></table>
+        </div>
     </main>
 </body>
 </html>

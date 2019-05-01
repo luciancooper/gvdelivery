@@ -9,9 +9,8 @@
         <tr><th><code>cuisine</code></th><td><code><%= data.cuisine %></code></td></tr>
     <% } %>
     <% if (data.address) { %>
-        <tr><th><code>address</code></th><td><code><%= data.address['Address'] %></code></td></tr>
-        <tr><th><code>city</code></th><td><code><%= data.address['City'] %></code></td></tr>
-        <tr><th><code>state</code></th><td><code><%= data.address['State'] %></code></td></tr>
-        <tr><th><code>zip</code></th><td><code><%= data.address['Zip'] %></code></td></tr>
+        <tr><th><code>address</code></th><td><pre><code><%= data.address['Address'] %>
+        <%= data.address['City'] %>, <%= data.address['State'] %>, <%= data.address['Zip'] %>
+        </code></pre></td></tr>
     <% } %>
 </tbody>
