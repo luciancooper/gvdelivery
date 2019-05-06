@@ -53,7 +53,7 @@ app.get('/', sessionChecker, (req, res) => {
     res.redirect('/home');
 });
 
-// route for restuarant registration
+// route for restaurant registration
 app.route('/register').get(sessionChecker, (req, res) => {
     res.render('register');
 }).post((req, res) => {
@@ -138,13 +138,19 @@ app.route('/dashboard').get((req, res) => {
         ts_expected = ts_ready+(20*60000);
     let data = {
         id:req.session.user,
-        address:`{"Address":"${req.body.address}","City":"${req.body.city}","State":"${req.body.state}","Zip":"${req.body.zip}"}`,
+        address:`{
+            "Address":"${req.body.address}",
+            "City":"${req.body.city}",
+            "State":"${req.body.state}",
+            "Zip":"${req.body.zip}"
+        }`,
         time_placed:db.formatTimeString(new Date(ts_placed)),
         time_ready:db.formatTimeString(new Date(ts_ready)),
         time_expected:db.formatTimeString(new Date(ts_expected)),
         price:req.body.price,
         prepaid:(req.body.prepaid || 'FALSE'),
     };
+
     console.log(`
     --------- Handling New Order ---------
     address:${data.address}
@@ -207,4 +213,4 @@ app.use(function (req, res, next) {
     res.status(404).send("Sorry can't find that!")
 });
 
-app.listen(port, () => console.log(`Web app listening at localhost:${port}`))
+app.listen(port, () => console.log(`Web app listening at localhost:${port}`));
