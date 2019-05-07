@@ -2,10 +2,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
+require('dotenv').config();
 const path = require('path');
 const db = require('./db');
 const app = express();
-const port = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Setup Public Folder
 app.use(express.static(path.join(__dirname, 'public')));
@@ -182,4 +183,4 @@ app.use((req, res, next) => {
     res.status(404).send("Sorry can't find that!")
 });
 
-app.listen(port, () => console.log(`Web app listening at localhost:${port}`))
+app.listen(PORT, () => console.log(`Listening on ${PORT}`));

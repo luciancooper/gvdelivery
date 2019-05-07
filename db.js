@@ -5,9 +5,10 @@ const saltRounds = 10;
 
 // PostgreSVG Connect String
 //console.log(process.env.DATABASE_URL);
+//console.log(process.env.ENV);
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl:true
+    ssl:(process.env.ENV==='production')
 });
 
 function executeQuery(callback,sql) {
@@ -26,7 +27,7 @@ function executeQuery(callback,sql) {
     });
 };
 
-/*(function(){
+(function(){
     function wipeDatabase(callback) {
         let sql = `
         DROP TABLE IF EXISTS orders,restaurants,users;
@@ -83,7 +84,7 @@ function executeQuery(callback,sql) {
             })
         }
     },`SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema'`);
-}());*/
+}());
 
 const db = (function(){
     return {

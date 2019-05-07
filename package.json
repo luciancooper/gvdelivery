@@ -22,11 +22,12 @@
     "body-parser": "^1.19.0",
     "consolidate": "^0.15.1",
     "cookie-parser": "^1.4.4",
+    "dotenv": "^8.0.0",
     "ejs": "*",
     "express": "*",
     "express-session": "^1.16.1",
     "pg": "*",
-    "sequelize": "^5.8.2",
-    "request": "*"
+    "request": "*",
+    "sequelize": "^5.8.2"
   }
 }
