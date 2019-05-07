@@ -2,6 +2,16 @@
 <html>
 <head>
     <%- include('partial/page-head.ejs', {title:'GV Register'}) %>
+    <script>
+    function submitForm(event) {
+        let password = this.elements.namedItem('password'),
+            password_confirm = this.elements.namedItem('password_confirm');
+        if (password.value !== password_confirm.value) {
+            document.getElementById('passwordMessage').innerText = "Passwords do not Match";
+            event.preventDefault();
+        }
+    }
+    </script>
 </head>
 <body page-main='main' page-topbar='topbar' class='flush'>
     <header id='topbar'>
@@ -13,56 +23,56 @@
     </header>
     <main id='main'>
       <main class="card signup">
-        <form action="/register" method="post">
+        <form action="/register" method="post" onsubmit='submitForm.call(this,event)'>
             <h3>Restaurant Info</h3>
             <section>
                 <div class="input-label-placeholder">
-                    <input type="text" class="form-input" placeholder='Restaurant Name' name='name' required autofocus>
+                    <input type="text" class="form-input" placeholder='Restaurant Name' name='name' required autofocus<% if(name){ %> value="<%= name %>"<% } %>>
                     <label>Restaurant Name</label>
                 </div>
                 <select class="form-select" name="cuisine" required>
-                    <option selected>Please Select a Cuisine</option>
-                    <option value='American'>American</option>
-                    <option value='Cajun'>Cajun</option>
-                    <option value='Caribbean'>Caribbean</option>
-                    <option value='Chinese'>Chinese</option>
-                    <option value='French'>French</option>
-                    <option value='German'>German</option>
-                    <option value='Greek'>Greek</option>
-                    <option value='Indian'>Indian</option>
-                    <option value='Italian'>Italian</option>
-                    <option value='Japanese'>Japanese</option>
-                    <option value='Korean'>Korean</option>
-                    <option value='Lebanese'>Lebanese</option>
-                    <option value='Mediterranean'>Mediterranean</option>
-                    <option value='Mexican'>Mexican</option>
-                    <option value='Moroccan'>Moroccan</option>
-                    <option value='Seafood'>Seafood</option>
-                    <option value='Soul'>Soul</option>
-                    <option value='Spanish'>Spanish</option>
-                    <option value='Thai'>Thai</option>
-                    <option value='Turkish'>Turkish</option>
-                    <option value='Vegitarian'>Vegitarian</option>
-                    <option value='Vietnamese'>Vietnamese</option>
+                    <option value=''<% if(!cuisine){ %> selected<% } %>>Please Select a Cuisine</option>
+                    <option value='American'<% if(cuisine==='American'){ %> selected<% } %>>American</option>
+                    <option value='Cajun'<% if(cuisine==='Cajun'){ %> selected<% } %>>Cajun</option>
+                    <option value='Caribbean'<% if(cuisine==='Caribbean'){ %> selected<% } %>>Caribbean</option>
+                    <option value='Chinese'<% if(cuisine==='Chinese'){ %> selected<% } %>>Chinese</option>
+                    <option value='French'<% if(cuisine==='French'){ %> selected<% } %>>French</option>
+                    <option value='German'<% if(cuisine==='German'){ %> selected<% } %>>German</option>
+                    <option value='Greek'<% if(cuisine==='Greek'){ %> selected<% } %>>Greek</option>
+                    <option value='Indian'<% if(cuisine==='Indian'){ %> selected<% } %>>Indian</option>
+                    <option value='Italian'<% if(cuisine==='Italian'){ %> selected<% } %>>Italian</option>
+                    <option value='Japanese'<% if(cuisine==='Japanese'){ %> selected<% } %>>Japanese</option>
+                    <option value='Korean'<% if(cuisine==='Korean'){ %> selected<% } %>>Korean</option>
+                    <option value='Lebanese'<% if(cuisine==='Lebanese'){ %> selected<% } %>>Lebanese</option>
+                    <option value='Mediterranean'<% if(cuisine==='Mediterranean'){ %> selected<% } %>>Mediterranean</option>
+                    <option value='Mexican'<% if(cuisine==='Mexican'){ %> selected<% } %>>Mexican</option>
+                    <option value='Moroccan'<% if(cuisine==='Moroccan'){ %> selected<% } %>>Moroccan</option>
+                    <option value='Seafood'<% if(cuisine==='Seafood'){ %> selected<% } %>>Seafood</option>
+                    <option value='Soul'<% if(cuisine==='Soul'){ %> selected<% } %>>Soul</option>
+                    <option value='Spanish'<% if(cuisine==='Spanish'){ %> selected<% } %>>Spanish</option>
+                    <option value='Thai'<% if(cuisine==='Thai'){ %> selected<% } %>>Thai</option>
+                    <option value='Turkish'<% if(cuisine==='Turkish'){ %> selected<% } %>>Turkish</option>
+                    <option value='Vegitarian'<% if(cuisine==='Vegitarian'){ %> selected<% } %>>Vegitarian</option>
+                    <option value='Vietnamese'<% if(cuisine==='Vietnamese'){ %> selected<% } %>>Vietnamese</option>
                 </select>
             </section>
             <h3>Restaurant Address</h3>
             <section>
                 <div class="input-label-placeholder">
-                    <input type="text" class="form-input" placeholder='Address' name='address' required>
+                    <input type="text" class="form-input" placeholder='Address' name='address' required<% if(address.Address){ %> value="<%= address.Address %>"<% } %>>
                     <label>Address</label>
                 </div>
                 <div class='flex-row'>
                     <div class="input-label-placeholder grow-5">
-                        <input type="text" class="form-input" placeholder="City" name='city' required value='New York'>
+                        <input type="text" class="form-input" placeholder="City" name='city' required<% if(address.City){ %> value="<%= address.City %>"<% } %>>
                         <label>City</label>
                     </div>
                     <div class="input-label-placeholder grow-1">
-                        <input type="text" class="form-input" placeholder="State" name='state' required value="NY">
+                        <input type="text" class="form-input" placeholder="State" name='state' required<% if(address.State){ %> value="<%= address.State %>"<% } %>>
                         <label>State</label>
                     </div>
                     <div class="input-label-placeholder grow-3">
-                        <input type="text" class="form-input" placeholder="Zip" name='zip' required>
+                        <input type="text" class="form-input" placeholder="Zip" name='zip' required<% if(address.Zip){ %> value="<%= address.Zip %>"<% } %>>
                         <label>Zip</label>
                     </div>
                 </div>
@@ -71,9 +81,10 @@
             <h3>Login Info</h3>
             <section>
                 <div class="input-label-placeholder">
-                    <input type="text" class="form-input" placeholder="Username" name='username' required>
+                    <input type="text" class="form-input" placeholder="Username" name='username' required<% if(username){ %> value="<%= username %>"<% } %>>
                     <label>Username</label>
                 </div>
+                <section class='alert'><% if(message){ %><%= message %><% } %></section>
                 <div class="input-label-placeholder">
                     <input type="password" class="form-input" placeholder="Password" name='password' required>
                     <label>Password</label>
@@ -82,6 +93,7 @@
                     <input type="password" class="form-input" placeholder="Confirm Password" name='password_confirm' required>
                     <label>Confirm Password</label>
                 </div>
+                <section id='passwordMessage' class='alert'></section>
             </section>
             <button type='submit' class="btn btn-primary btn-block">Register</button>
         </form>
