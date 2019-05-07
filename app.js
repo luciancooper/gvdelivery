@@ -1,4 +1,5 @@
 const express = require('express');
+const request = require('request');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const bodyParser = require('body-parser');
@@ -49,6 +50,8 @@ var sessionChecker = (req, res, next) => {
     else next();
 };
 
+app.use('/api',require('./api'));
+
 // route for home page
 app.get('/', sessionChecker, (req, res) => {
     res.redirect('/home');
@@ -66,14 +69,6 @@ app.route('/register').get(sessionChecker, (req, res) => {
         cuisine:req.body.cuisine,
         address:`{"Address":"${req.body.address}","City":"${req.body.city}","State":"${req.body.state}","Zip":"${req.body.zip}"}`
     };
-    console.log(`
-    --------- Handling New Registration ---------
-    username:'${data.username}'
-    password:'${data.password}'
-    name:'${data.name}'
-    cuisine:'${data.cuisine}'
-    address:'${data.address}'
-    `);
     db.checkUsername(data.username,function(user,err) {
         if (err) return res.status(400).send(err);
         if (user) return res.redirect('/register');
@@ -102,49 +97,36 @@ app.route('/login').get(sessionChecker, (req, res) => {
     delete req.session.params;
 }).post((req, res) => {
     // Handle Login
+    let endpoint = `${req.protocol}://${req.hostname}:${port}/api/login`;
     let data = {
         username:req.body.username,
         password:req.body.password
     };
-    //console.log(`Handling Login -> username:'${data.username}' password:'${data.password}'`)
-    db.checkUsername(data.username,function(user,err){
-        if (err) return res.status(400).send(err);
-        if (!user) {
-            req.session.params = {
-                message:"No Username Found",
-                username:data.username
-            };
-            return res.redirect('/login');
-        }
-        if (bcrypt.compareSync(data.password, user.password)) {
-            req.session.user = user.id;
+    request.post({ url:endpoint, form: data, json:true },(error,response,body) => {
+        if (error) return res.status(400).send(error);
+        if (response.statusCode !== 200) return res.status(400).send("JSON ERROR!");
+        console.log(body);
+        if (body.success) {
+            req.session.user = body.id;
             return res.redirect('/dashboard');
         } else {
-            req.session.params = {
-                message:"Incorrect Password",
-                username:data.username
-            };
+            req.session.params = { message:body.message, username:data.username };
             return res.redirect('/login');
         }
     });
 });
 
 // route for user's dashboard
-app.route('/dashboard').get((req, res) => {
+app.route('/dashboard').get((req, res, next) => {
+    if (!(req.session.user && req.cookies.user_sid)) res.redirect('/login');
+    else next();
+},(req, res) => {
     //console.log(`req.session.user:'${req.session.user}' req.cookies.user_sid:'${req.cookies.user_sid}'`);
-    if (!(req.session.user && req.cookies.user_sid)) return res.redirect('/login');
     if (req.session.params) console.log(`/dashboard params:{${JSON.stringify(req.session.params)}}`);
-    db.getRestaurantName(req.session.user,function(name,err) {
+    db.getDashboard(req.session.user,function(data,err) {
         if (err) return res.status(400).send(err);
-        db.getOrders(req.session.user,function(result,err) {
-            if (err) return res.status(400).send(err);
-            res.render('dashboard',Object.assign({
-                name:name,
-                orders:result.rows,
-                tab:undefined
-            }, req.session.params || {}));
-            delete req.session.params;
-        });
+        res.render('dashboard',Object.assign({ tab:undefined }, data, req.session.params || {}));
+        delete req.session.params;
     });
 }).post((req, res) => {
     // Handle New Order
@@ -160,16 +142,6 @@ app.route('/dashboard').get((req, res) => {
         price:req.body.price,
         prepaid:(req.body.prepaid || 'FALSE'),
     };
-    console.log(`
-    --------- Handling New Order ---------
-    address:${data.address}
-    time_placed:${data.time_placed}
-    time_ready:${data.time_ready}
-    time_expected:${data.time_expected}
-    price:${data.price}
-    prepaid:${data.prepaid}
-    `);
-
     db.createOrder(data,function(err) {
         if (err) return res.status(400).send(err);
         req.session.params = {tab:'current_deliveries'};
@@ -188,17 +160,12 @@ app.get('/logout', (req, res) => {
 
 app.route('/admin').get((req, res) => {
     if (req.session.params) console.log(`/admin params:${JSON.stringify(req.session.params)}`);
-    db.selectRestaurants(function(result1,err) {
-        if (err) return res.status(400).send(err);
-        db.getOrdersAdmin(function(result2,err) {
-            if (err) return res.status(400).send(err);
-            res.render('admin',Object.assign({
-                users:result1.rows,
-                orders:result2.rows,
-                tab:undefined
-            }, req.session.params || {}));
-            delete req.session.params;
-        });
+    let endpoint = `${req.protocol}://${req.hostname}:${port}/api/admin`;
+    request({ url:endpoint,json:true },(error,response,body) => {
+        if (error) return res.status(400).send(error);
+        if (response.statusCode !== 200) return res.status(400).send("JSON ERROR!");
+        res.render('admin',Object.assign({tab:undefined}, body, req.session.params || {}));
+        delete req.session.params;
     });
 }).post((req, res) => {
     // Handle Order Completion
