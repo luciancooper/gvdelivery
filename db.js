@@ -10,23 +10,82 @@ const pool = new Pool({
     connectionString: connectionString
 });
 
-const db = (function(){
-    function executeQuery(callback,sql) {
-        pool.connect(function(err,client,done) {
+function executeQuery(callback,sql) {
+    pool.connect(function(err,client,done) {
+        if (err) {
+            console.log("Unable to connect to PostgreSQL: "+ err);
+            callback(null,err);
+        }
+        client.query(sql,function(err,result) {
+            done(); // release client back to pool
             if (err) {
-                console.log("Unable to connect to PostgreSQL: "+ err);
+                console.log("Error running query: "+err);
                 callback(null,err);
-            }
-            client.query(sql,function(err,result) {
-                done(); // release client back to pool
-                if (err) {
-                    console.log("Error running query: "+err);
-                    callback(null,err);
-                } else callback(result);
-            });
+            } else callback(result);
         });
-    };
+    });
+};
 
+(function(){
+    function wipeDatabase(callback) {
+        let sql = `
+        DROP TABLE IF EXISTS orders,restaurants,users;
+        DROP TYPE IF EXISTS CUISINE;
+        `;
+        executeQuery(function(result,err) {
+            if (err) console.log(`Error Wiping Database: ${err}`);
+            callback(!err);
+        },sql.trim());
+    }
+    function createDatabase(callback) {
+        let sql = `
+        CREATE TYPE CUISINE AS ENUM ('American','Cajun','Caribbean','Chinese','French','German','Greek','Indian','Italian','Japanese','Korean','Lebanese','Mediterranean','Mexican','Moroccan','Seafood','Soul','Spanish','Thai','Turkish','Vegetarian','Vietnamese');
+        CREATE TABLE IF NOT EXISTS users (
+            id serial PRIMARY KEY,
+            username VARCHAR(30) NOT NULL UNIQUE,
+            password TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS restaurants (
+            user_id integer NOT NULL UNIQUE REFERENCES users(id),
+            name VARCHAR(30) NOT NULL,
+            cuisine CUISINE NOT NULL,
+            address jsonb NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS orders (
+            id serial PRIMARY KEY,
+            restaurant_id integer NOT NULL REFERENCES restaurants(user_id),
+            delivery_address jsonb NOT NULL,
+            price money NOT NULL,
+            prepaid boolean NOT NULL,
+            time_placed timestamp with time zone NOT NULL,
+            time_ready timestamp with time zone NOT NULL,
+            time_expected timestamp with time zone NOT NULL,
+            time_delivered timestamp with time zone
+        );
+        `;
+        executeQuery(function(result,err) {
+            if (err) console.log(`Error Creating Database: ${err}`);
+            callback(!err);
+        },sql.trim());
+    }
+    executeQuery(function(result,err) {
+        if (err) console.log(`Error Querying Database Tables: ${err}`);
+        let tables = result.rows.map((e) => { return e.tablename; });
+        if (tables.length !== 3) {
+            console.log("Wiping Database...");
+            wipeDatabase((complete) => {
+                if (!complete) return;
+                createDatabase((complete) => {
+                    console.log("Setting Up Database...")
+                    if (!complete) return;
+                    console.log("Database Setup Complete");
+                });
+            })
+        }
+    },`SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema'`);
+}());
+
+const db = (function(){
     return {
         executeQuery:executeQuery,
         checkUsername: function(username,callback) {
@@ -60,7 +119,7 @@ const db = (function(){
                     executeQuery(function(result,err) {
                         if (err) return callback(null,err);
                         callback({ success:true, id:id });
-                    },`INSERT INTO restaurants(client_id, name, cuisine, address) VALUES (${id},'${data.name}', '${data.cuisine}', '${JSON.stringify(data.address)}')`);
+                    },`INSERT INTO restaurants(user_id, name, cuisine, address) VALUES (${id},'${data.name}', '${data.cuisine}', '${JSON.stringify(data.address)}')`);
                 },`INSERT INTO users(username, password) VALUES ('${data.username}', '${hash}') RETURNING id`);
             });
         },
@@ -88,7 +147,7 @@ const db = (function(){
         getRestaurantName:function(id,callback) {
             executeQuery(function(result,err) {
                 callback((result && result.rows.length > 0) ? result.rows[0].name : null,err);
-            },`SELECT name FROM restaurants WHERE client_id = ${id}`);
+            },`SELECT name FROM restaurants WHERE user_id = ${id}`);
         },
         createOrder:function(data,callback) {
             executeQuery(function(result,err) {
@@ -115,7 +174,7 @@ const db = (function(){
                     if (err) return callback(null,err);
                     callback({ name:name, orders:result.rows });
                 },`SELECT delivery_address, price, prepaid, time_placed, time_ready, time_expected, time_delivered FROM orders WHERE restaurant_id = ${id}`);
-            },`SELECT name FROM restaurants WHERE client_id = ${id}`);
+            },`SELECT name FROM restaurants WHERE user_id = ${id}`);
         },
         getAdminData:function(callback) {
             executeQuery((users,err) => {
@@ -126,8 +185,8 @@ const db = (function(){
                         users:users.rows,
                         orders:orders.rows
                     });
-                },'SELECT o.id, r.name, o.delivery_address, o.price, o.prepaid, o.time_placed, o.time_ready, o.time_expected, o.time_delivered FROM orders o INNER JOIN restaurants r ON (o.restaurant_id = r.client_id)');
-            },'SELECT u.id, u.username, u.password, r.name, r.cuisine, r.address FROM users u INNER JOIN restaurants r ON (u.id = r.client_id)');
+                },'SELECT o.id, r.name, o.delivery_address, o.price, o.prepaid, o.time_placed, o.time_ready, o.time_expected, o.time_delivered FROM orders o INNER JOIN restaurants r ON (o.restaurant_id = r.user_id)');
+            },'SELECT u.id, u.username, u.password, r.name, r.cuisine, r.address FROM users u INNER JOIN restaurants r ON (u.id = r.user_id)');
         },
     };
 }());
