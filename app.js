@@ -1,6 +1,4 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
-const saltRounds = 10;
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
@@ -18,6 +16,7 @@ app.set('view engine', 'ejs');
 
 
 // Add Body Parser
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // initialize cookie-parser to allow us access the cookies stored in the browser. 
@@ -27,7 +26,7 @@ app.use(cookieParser());
 // initialize express-session to allow us track the logged-in user across sessions.
 app.use(session({
     key: 'user_sid',
-    secret: 'somerandonstuffs',
+    secret: 'keyboard_Cat',
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -48,6 +47,8 @@ var sessionChecker = (req, res, next) => {
     else next();
 };
 
+app.use('/api',require('./api'));
+
 // route for home page
 app.get('/', sessionChecker, (req, res) => {
     res.redirect('/home');
@@ -55,7 +56,15 @@ app.get('/', sessionChecker, (req, res) => {
 
 // route for restuarant registration
 app.route('/register').get(sessionChecker, (req, res) => {
-    res.render('register');
+    //if (req.session.params) console.log(`/register params:{${JSON.stringify(req.session.params)}}`);
+    res.render('register',Object.assign({
+        message:'',
+        username:undefined,
+        name:undefined,
+        cuisine:undefined,
+        address: { Address:undefined, City:"New York", State:"NY", Zip:undefined }
+    }, req.session.params || {}));
+    delete req.session.params;
 }).post((req, res) => {
     // Handle Registration
     let data = {
@@ -63,74 +72,61 @@ app.route('/register').get(sessionChecker, (req, res) => {
         password:req.body.password,
         name:req.body.name,
         cuisine:req.body.cuisine,
-        address:`{"Address":"${req.body.address}","City":"${req.body.city}","State":"${req.body.state}","Zip":"${req.body.zip}"}`
+        address: {
+            Address:req.body.address,
+            City:req.body.city,
+            State:req.body.state,
+            Zip:req.body.zip
+        }
     };
-    console.log(`
-    --------- Handling New Registration ---------
-    username:'${data.username}'
-    password:'${data.password}'
-    name:'${data.name}'
-    cuisine:'${data.cuisine}'
-    address:'${data.address}'
-    `);
-    db.checkUsername(data.username,function(user,err) {
+    db.registerAccount(data,(result,err) => {
         if (err) return res.status(400).send(err);
-        if (user) return res.redirect('/register');
-        var hash = bcrypt.hashSync(data.password, saltRounds);
-        console.log(`hashed password:'${hash}'`);
-        db.createUser(data.username,hash,function(id,err) {
-            if (err) return res.status(400).send(err);
-            if (!id) return res.status(400).send("Error creating user");
-            console.log(`user id:${id}`);
-            db.createRestaurant(id,{name:data.name,cuisine:data.cuisine,address:data.address},function(err) {
-                if (err) return res.status(400).send(err);
-                req.session.user = id;
-                res.redirect('/dashboard');
-            });
-        });
+        if (result.success) {
+            req.session.user = result.id;
+            return res.redirect('/dashboard');
+        }
+        delete result.success;
+        req.session.params = result;
+        return res.redirect('/register');
     });
 });
 
 // route for user Login
 app.route('/login').get(sessionChecker, (req, res) => {
-    let data = req.session.login_data || {};
-    res.render('login',{message:(data.message || ''),username:data.username});
-    delete req.session.login_data;
+    //if (req.session.params) console.log(`/login params:{${JSON.stringify(req.session.params)}}`);
+    res.render('login',Object.assign({
+        message:'',
+        username:undefined
+    }, req.session.params || {}));
+    delete req.session.params;
 }).post((req, res) => {
     // Handle Login
     let data = {
         username:req.body.username,
         password:req.body.password
     };
-    //console.log(`Handling Login -> username:'${data.username}' password:'${data.password}'`)
-    db.checkUsername(data.username,function(user,err){
+    db.checkLogin(data,(result,err) => {
         if (err) return res.status(400).send(err);
-        if (!user) {
-            req.session.login_data = {message:"No Username Found",username:data.username};
-            return res.redirect('/login');
-        }
-        if (bcrypt.compareSync(data.password, user.password)) {
-            req.session.user = user.id;
+        if (result.success) {
+            req.session.user = result.id;
             return res.redirect('/dashboard');
-        } else {
-            req.session.login_data = {message:"Incorrect Password",username:data.username};
-            return res.redirect('/login');
         }
+        req.session.params = { message:result.message, username:data.username };
+        return res.redirect('/login');
     });
 });
 
 // route for user's dashboard
-app.route('/dashboard').get((req, res) => {
-    console.log(`req.session.user:'${req.session.user}' req.cookies.user_sid:'${req.cookies.user_sid}'`)
-    if (req.session.user && req.cookies.user_sid) {
-        db.getRestaurantName(req.session.user,function(name,err) {
-            if (err) return res.status(400).send(err);
-            db.getOrders(req.session.user,function(orders,err) {
-                if (err) return res.status(400).send(err);
-                res.render('dashboard',{name:name,orders:orders,tab:undefined});
-            });
-        });
-    } else res.redirect('/login');
+app.route('/dashboard').get((req, res, next) => {
+    if (!(req.session.user && req.cookies.user_sid)) res.redirect('/login');
+    else next();
+},(req, res) => {
+    //if (req.session.params) console.log(`/dashboard params:{${JSON.stringify(req.session.params)}}`);
+    db.getDashboard(req.session.user,function(data,err) {
+        if (err) return res.status(400).send(err);
+        res.render('dashboard',Object.assign({ tab:undefined }, data, req.session.params || {}));
+        delete req.session.params;
+    });
 }).post((req, res) => {
     // Handle New Order
     let ts_placed = Date.now(),
@@ -138,32 +134,17 @@ app.route('/dashboard').get((req, res) => {
         ts_expected = ts_ready+(20*60000);
     let data = {
         id:req.session.user,
-        address:`{"Address":"${req.body.address}","City":"${req.body.city}","State":"${req.body.state}","Zip":"${req.body.zip}"}`,
+        address:JSON.stringify({Address:req.body.address,City:req.body.city,State:req.body.state,Zip:req.body.zip}),
         time_placed:db.formatTimeString(new Date(ts_placed)),
         time_ready:db.formatTimeString(new Date(ts_ready)),
         time_expected:db.formatTimeString(new Date(ts_expected)),
         price:req.body.price,
         prepaid:(req.body.prepaid || 'FALSE'),
     };
-    console.log(`
-    --------- Handling New Order ---------
-    address:${data.address}
-    time_placed:${data.time_placed}
-    time_ready:${data.time_ready}
-    time_expected:${data.time_expected}
-    price:${data.price}
-    prepaid:${data.prepaid}
-    `);
-
-    db.createOrder(data,function(err) {
+    db.createOrder(data,(err) => {
         if (err) return res.status(400).send(err);
-        db.getRestaurantName(req.session.user,function(name,err) {
-            if (err) return res.status(400).send(err);
-            db.getOrders(req.session.user,function(orders,err) {
-                if (err) return res.status(400).send(err);
-                res.render('dashboard',{name:name,orders:orders,tab:'current_deliveries'});
-            });
-        });
+        req.session.params = {tab:'current_deliveries'};
+        res.redirect('/dashboard');
     });
 });
 
@@ -177,33 +158,27 @@ app.get('/logout', (req, res) => {
 
 
 app.route('/admin').get((req, res) => {
-    db.selectRestaurants(function(users,err) {
+    //if (req.session.params) console.log(`/admin params:${JSON.stringify(req.session.params)}`);
+    db.getAdminData((result,err) => {
         if (err) return res.status(400).send(err);
-        db.getOrdersAdmin(function(orders,err) {
-            if (err) return res.status(400).send(err);
-            res.render('admin',{users:users,orders:orders,tab:undefined});
-        })
+        res.render('admin',Object.assign({tab:undefined}, result, req.session.params || {}));
+        delete req.session.params;
     });
 }).post((req, res) => {
     // Handle Order Completion
-    db.completeOrder(req.body.orderid,Date.now(),function(err) {
+    db.completeOrder(req.body.orderid,Date.now(),(err) => {
         if (err) return res.status(400).send(err);
-        db.selectRestaurants(function(users,err) {
-            if (err) return res.status(400).send(err);
-            db.getOrdersAdmin(function(orders,err) {
-                if (err) return res.status(400).send(err);
-                res.render('admin',{users:users,orders:orders,tab:'current_deliveries'});
-            })
-        });
+        req.session.params = {tab:'current_deliveries'};
+        res.redirect('/admin');
     });
 });
 
-app.get('/home', function (req, res) {
+app.get('/home', (req, res) => {
     res.render('home');
 });
 
 // route for handling 404 requests(unavailable routes)
-app.use(function (req, res, next) {
+app.use((req, res, next) => {
     res.status(404).send("Sorry can't find that!")
 });
 

@@ -2,15 +2,24 @@
 <html>
 <head>
     <%- include('partial/page-head.ejs', {title:'GV Admin'}) %>
+    <script>
+    function toggleOpen(event) {
+        this.nextElementSibling.classList.toggle('show');
+    }
+    </script>
 </head>
 <body page-main='main' page-panel-left='left-nav' page-topbar='topbar'>
     <header id='topbar'>
-        <div class='container flex-row align-center'>
+        <div class='container flex-row align-center justify-between'>
             <h4>Greenwich Village Delivery Service</h4>
-            <span class='grow-1'></span>
-            <div class="flex-row align-center" spaced='0.5'>
-                <i class="fas fa-user"></i>
-                <span>Admin</span>
+            <div class="dropdown">
+                <div class="btn btn-secondary dropdown-toggle flex-row align-center" spaced='0.5' onclick='toggleOpen.call(this,event)'>
+                    <i class="fas fa-user"></i>
+                    <span>Admin</span>
+                </div>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/">Home</a>
+                </div>
             </div>
         </div>
     </header>

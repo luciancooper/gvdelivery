@@ -26,6 +26,7 @@
     "express": "*",
     "express-session": "^1.16.1",
     "pg": "*",
-    "sequelize": "^5.8.2"
+    "sequelize": "^5.8.2",
+    "request": "*"
   }
 }
