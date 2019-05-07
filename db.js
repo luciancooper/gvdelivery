@@ -4,10 +4,9 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
 // PostgreSVG Connect String
-const connectionString = "postgres://luciancooper:password@localhost:5432/gvdelivery";
-
+//console.log(process.env.DATABASE_URL);
 const pool = new Pool({
-    connectionString: connectionString
+    connectionString: process.env.DATABASE_URL,
 });
 
 function executeQuery(callback,sql) {
