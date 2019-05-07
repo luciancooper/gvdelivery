@@ -7,6 +7,7 @@ const saltRounds = 10;
 //console.log(process.env.DATABASE_URL);
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
+    ssl:true
 });
 
 function executeQuery(callback,sql) {
@@ -25,7 +26,7 @@ function executeQuery(callback,sql) {
     });
 };
 
-(function(){
+/*(function(){
     function wipeDatabase(callback) {
         let sql = `
         DROP TABLE IF EXISTS orders,restaurants,users;
@@ -82,7 +83,7 @@ function executeQuery(callback,sql) {
             })
         }
     },`SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema'`);
-}());
+}());*/
 
 const db = (function(){
     return {
