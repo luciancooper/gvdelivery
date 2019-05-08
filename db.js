@@ -2,7 +2,9 @@
 const { Pool, Client } = require('pg');
 
 // PostgreSVG Connect String
-const connectionString = "postgres://luciancooper:password@localhost:5432/gvdelivery";
+// const connectionString = "postgres://luciancooper:password@localhost:5432/gvdelivery";
+const connectionString = "postgres://colgworld:password@172.21.0.2:54320/GVDeliveryPostgresDB";
+
 
 const pool = new Pool({
     connectionString: connectionString
