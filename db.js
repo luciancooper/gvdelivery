@@ -3,8 +3,9 @@ const { Pool, Client } = require('pg');
 
 // PostgreSVG Connect String
 // const connectionString = "postgres://luciancooper:password@localhost:5432/gvdelivery";
-const connectionString = "postgres://colgworld:password@172.21.0.2:54320/GVDeliveryPostgresDB";
+const connectionString = "postgres://postgres:backdoor@127.0.0.1:54320/gvDeliveryDB";
 
+// docker exec -it pls psql -U postgres
 
 const pool = new Pool({
     connectionString: connectionString
