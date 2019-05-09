@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('partial/page-head.ejs', {title:(title||'Error')}) %>
+</head>
+<body page-main='main' page-topbar='topbar' class='flush'>
+    <header id='topbar'>
+        <div class='container flex-row align-center'>
+            <h4>Greenwich Village Delivery Service</h4>
+            <span class='grow-1'></span>
+            <a class='btn btn-outline-primary' href='/'><i class="fas fa-home"></i></a>
+        </div>
+    </header>
+    <main id='main' class='flex-col align-center justify-center'>
+        <%- include(`partial/${content}`,{data:args}) %>
+    </main>
+</body>
+</html>

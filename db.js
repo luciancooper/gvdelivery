@@ -2,10 +2,8 @@
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+var connectionFailed = false;
 
-// PostgreSVG Connect String
-//console.log(process.env.DATABASE_URL);
-//console.log(process.env.ENV);
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl:(process.env.ENV==='production')
@@ -15,7 +13,8 @@ function executeQuery(callback,sql) {
     pool.connect(function(err,client,done) {
         if (err) {
             console.log("Unable to connect to PostgreSQL: "+ err);
-            callback(null,err);
+            connectionFailed = true;
+            return callback(null,err);
         }
         client.query(sql,function(err,result) {
             done(); // release client back to pool
@@ -70,7 +69,10 @@ function executeQuery(callback,sql) {
         },sql.trim());
     }
     executeQuery(function(result,err) {
-        if (err) console.log(`Error Querying Database Tables: ${err}`);
+        if (err) {
+            if (connectionFailed) return;
+            console.log(`Error Querying Database Tables: ${err}`);
+        }
         let tables = result.rows.map((e) => { return e.tablename; });
         if (tables.length !== 3) {
             console.log("Wiping Database...");
@@ -86,8 +88,11 @@ function executeQuery(callback,sql) {
     },`SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema'`);
 }());
 
-const db = (function(){
+module.exports = (function(){
     return {
+        get connectionFailed() {
+            return connectionFailed;
+        },
         executeQuery:executeQuery,
         checkUsername: function(username,callback) {
             executeQuery(function(result,err) {
@@ -191,5 +196,3 @@ const db = (function(){
         },
     };
 }());
-
-module.exports = db;

@@ -48,6 +48,19 @@ var sessionChecker = (req, res, next) => {
     else next();
 };
 
+// middleware function to check if connection failed
+var dbCheck = (req, res, next) => {
+    if (db.connectionFailed) {
+        next({
+            image:'dberr-color',
+            title:'Database Connection Error',
+            message:'Connection to the database could not be established'
+        });
+    } else {
+        next();
+    }
+};
+
 app.use('/api',require('./api'));
 
 // route for home page
@@ -56,7 +69,7 @@ app.get('/', sessionChecker, (req, res) => {
 });
 
 // route for restuarant registration
-app.route('/register').get(sessionChecker, (req, res) => {
+app.route('/register').get(sessionChecker, (req, res, next) => {
     //if (req.session.params) console.log(`/register params:{${JSON.stringify(req.session.params)}}`);
     res.render('register',Object.assign({
         message:'',
@@ -66,7 +79,7 @@ app.route('/register').get(sessionChecker, (req, res) => {
         address: { Address:undefined, City:"New York", State:"NY", Zip:undefined }
     }, req.session.params || {}));
     delete req.session.params;
-}).post((req, res) => {
+}).post(dbCheck, (req, res, next) => {
     // Handle Registration
     let data = {
         username:req.body.username,
@@ -81,7 +94,13 @@ app.route('/register').get(sessionChecker, (req, res) => {
         }
     };
     db.registerAccount(data,(result,err) => {
-        if (err) return res.status(400).send(err);
+        if (err) {
+            return next({
+                image:'dbwarn-color',
+                title:'Database Operation Error',
+                message:err
+            });
+        }
         if (result.success) {
             req.session.user = result.id;
             return res.redirect('/dashboard');
@@ -93,21 +112,27 @@ app.route('/register').get(sessionChecker, (req, res) => {
 });
 
 // route for user Login
-app.route('/login').get(sessionChecker, (req, res) => {
+app.route('/login').get(sessionChecker, (req, res, next) => {
     //if (req.session.params) console.log(`/login params:{${JSON.stringify(req.session.params)}}`);
     res.render('login',Object.assign({
         message:'',
         username:undefined
     }, req.session.params || {}));
     delete req.session.params;
-}).post((req, res) => {
+}).post(dbCheck, (req, res, next) => {
     // Handle Login
     let data = {
         username:req.body.username,
         password:req.body.password
     };
     db.checkLogin(data,(result,err) => {
-        if (err) return res.status(400).send(err);
+        if (err) {
+            return next({
+                image:'dbwarn-color',
+                title:'Database Operation Error',
+                message:err
+            });
+        }
         if (result.success) {
             req.session.user = result.id;
             return res.redirect('/dashboard');
@@ -121,14 +146,20 @@ app.route('/login').get(sessionChecker, (req, res) => {
 app.route('/dashboard').get((req, res, next) => {
     if (!(req.session.user && req.cookies.user_sid)) res.redirect('/login');
     else next();
-},(req, res) => {
+},dbCheck,(req, res, next) => {
     //if (req.session.params) console.log(`/dashboard params:{${JSON.stringify(req.session.params)}}`);
     db.getDashboard(req.session.user,function(data,err) {
-        if (err) return res.status(400).send(err);
+        if (err) {
+            return next({
+                image:'dbwarn-color',
+                title:'Database Operation Error',
+                message:err
+            });
+        }
         res.render('dashboard',Object.assign({ tab:undefined }, data, req.session.params || {}));
         delete req.session.params;
     });
-}).post((req, res) => {
+}).post(dbCheck, (req, res, next) => {
     // Handle New Order
     let ts_placed = Date.now(),
         ts_ready = ts_placed+(req.body.preptime*60000),
@@ -143,7 +174,13 @@ app.route('/dashboard').get((req, res, next) => {
         prepaid:(req.body.prepaid || 'FALSE'),
     };
     db.createOrder(data,(err) => {
-        if (err) return res.status(400).send(err);
+        if (err) {
+            return next({
+                image:'dbwarn-color',
+                title:'Database Operation Error',
+                message:err
+            });
+        }
         req.session.params = {tab:'current_deliveries'};
         res.redirect('/dashboard');
     });
@@ -158,17 +195,29 @@ app.get('/logout', (req, res) => {
 });
 
 
-app.route('/admin').get((req, res) => {
+app.route('/admin').get(dbCheck, (req, res,next) => {
     //if (req.session.params) console.log(`/admin params:${JSON.stringify(req.session.params)}`);
     db.getAdminData((result,err) => {
-        if (err) return res.status(400).send(err);
+        if (err) {
+            return next({
+                image:'dbwarn-color',
+                title:'Database Operation Error',
+                message:err
+            });
+        }
         res.render('admin',Object.assign({tab:undefined}, result, req.session.params || {}));
         delete req.session.params;
     });
-}).post((req, res) => {
+}).post(dbCheck,(req, res, next) => {
     // Handle Order Completion
     db.completeOrder(req.body.orderid,Date.now(),(err) => {
-        if (err) return res.status(400).send(err);
+        if (err) {
+            return next({
+                image:'dbwarn-color',
+                title:'Database Operation Error',
+                message:err
+            });
+        }
         req.session.params = {tab:'current_deliveries'};
         res.redirect('/admin');
     });
@@ -178,9 +227,30 @@ app.get('/home', (req, res) => {
     res.render('home');
 });
 
-// route for handling 404 requests(unavailable routes)
+// Route to show environment variables (for development & deployment purposes)
+app.get('/env',(req,res) => {
+    res.json(process.env);
+});
+
+// 404 Error Handling
 app.use((req, res, next) => {
-    res.status(404).send("Sorry can't find that!")
+    res.status(404);
+    res.render('errorpage',{title:'Error 404',content:'error404',args:{}});
+});
+
+// 500 Server Error Handling
+app.use(function(error, req, res, next) {
+    res.status(500);
+    // Args to pass to error content template. Must include icon
+    var args = {image:'server-color',title:'Internal Server Error'};
+    if (error && typeof error === 'object' && !(error instanceof Error)) {
+        // Error was triggered manually and information was passed
+        args = Object.assign(args,error);
+    } else {
+        // Error not triggered manually
+        args = Object.assign({message:error});
+    }
+    res.render('errorpage', {title:'Error 500',content:'error500',args:args});
 });
 
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
