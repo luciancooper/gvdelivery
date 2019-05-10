@@ -1,0 +1,15 @@
+<div class='flex-row align-center justify-center'>
+    <div class='flex-col align-center justify-center'>
+        <svg width='200' height='200'>
+            <use href='icons.svg#<%if(data.image){%><%=data.image%><%}else{%>server-color<%}%>' width='100%' height='100%'></use>
+        </svg>
+    </div>
+    <div class='flex-col align-left justify-center' style='margin-left:3rem;'>
+        <h1 style='margin-bottom:1rem;'>
+            <%if(data.title){%><%=data.title%><%}else{%>Error 500<%}%>
+        </h1>
+        <% if (data.message) { %>
+            <h2 style='margin-top:0;font-weight:normal;'><%=data.message%></h2>
+        <% } %>
+    </div>
+</div>
