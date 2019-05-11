@@ -1,0 +1,22 @@
+# OS Generated Files
+.DS_Store
+._*
+
+# VisualStudio Code workspace files
+.vscode
+
+# IntelliJ IDEA workspace files
+.idea
+
+# Eclipse workspace files
+.project
+.settings
+
+# Node.js
+node_modules
+
+# Environment Variables
+.env
+
+# Heroku Deployment Files
+Procfile
