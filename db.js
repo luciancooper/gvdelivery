@@ -6,7 +6,7 @@ var connectionFailed = false;
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl:(process.env.ENV==='production')
+    ssl:(process.env.NODE_ENV==='production')
 });
 
 function executeQuery(callback,sql) {

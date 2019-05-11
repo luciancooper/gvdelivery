@@ -1,8 +1,11 @@
 # gvdelivery
 
-#### Heroku Deployment
+## Deployments:
 
-App Url:
+### Heroku:
 
-https://ancient-mountain-26024.herokuapp.com/
+[ancient-mountain-26024.herokuapp.com](https://ancient-mountain-26024.herokuapp.com)
 
+### Pivotal Cloud Foundry:
+
+[gvdelivery-lean-pangolin.cfapps.io](https://gvdelivery-lean-pangolin.cfapps.io)
