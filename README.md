@@ -4,8 +4,12 @@
 
 ### Heroku:
 
-[ancient-mountain-26024.herokuapp.com](https://ancient-mountain-26024.herokuapp.com)
+[gvdelivery.herokuapp.com](https://gvdelivery.herokuapp.com)
 
 ### Pivotal Cloud Foundry:
 
-[gvdelivery-lean-pangolin.cfapps.io](https://gvdelivery-lean-pangolin.cfapps.io)
+[gvdelivery.cfapps.io](https://gvdelivery.cfapps.io)
+
+### IBM Cloud
+
+[gvdelivery.mybluemix.net](https://gvdelivery.mybluemix.net)
