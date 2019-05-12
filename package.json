@@ -4,7 +4,7 @@
   "description": "Web Application for food delivery coordination",
   "main": "app.js",
   "scripts": {
-    "start": "open http://localhost:3000 && node app.js",
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
