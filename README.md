@@ -13,3 +13,7 @@
 ### IBM Cloud
 
 [gvdelivery.mybluemix.net](https://gvdelivery.mybluemix.net)
+
+### AWS Elastic Beanstalk:
+
+[gvdelivery-env.nprmp2k9z3.us-west-2.elasticbeanstalk.com](http://gvdelivery-env.nprmp2k9z3.us-west-2.elasticbeanstalk.com)
